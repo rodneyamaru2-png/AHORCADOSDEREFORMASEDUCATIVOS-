@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Ahorcado: Reformas Educativas de Bolivia</title>
+<style>
+:root{--card:rgba(255,252,244,.9);--ink:#2b1d14;--soft:#6b5442;--key:#fff;--keyb:#c9b28f;--ok:#2e7d32;--bad:#c62828;--gold:#e0a21a;--page:#2b1d14;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--card:rgba(28,22,18,.9);--ink:#f6ead8;--soft:#c9b59c;--key:#3a2c22;--keyb:#6b5442;--page:#120d0a}}
+:root[data-theme="dark"]{color-scheme:dark;--card:rgba(28,22,18,.9);--ink:#f6ead8;--soft:#c9b59c;--key:#3a2c22;--keyb:#6b5442;--page:#120d0a}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--page);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif}
+#stage{min-height:100vh;background-size:cover;background-position:center;transition:background-image .4s;padding:10px;display:flex;flex-direction:column;align-items:center;gap:10px}
+#hud{width:100%;max-width:760px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;background:var(--card);border-radius:14px;padding:8px 12px;font-weight:700}
+#hud span{white-space:nowrap}
+#time.warn{color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.45}}
+#card{position:relative;width:100%;max-width:760px;background:var(--card);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
+#top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
+#man{width:150px;height:187px;flex:none}
+#man .g,#man .p{stroke:var(--ink);stroke-width:5;stroke-linecap:round;fill:none}
+#man .p{opacity:0;transition:opacity .3s;stroke:var(--bad)}
+#man .p.on{opacity:1}
+#info{flex:1;min-width:230px}
+#hint{margin:0 0 12px;font-size:1.05rem;line-height:1.45;color:var(--soft)}
+#word{display:flex;flex-wrap:wrap;gap:6px}
+#word span{width:clamp(20px,5.2vw,34px);height:clamp(28px,7vw,42px);border-bottom:4px solid var(--ink);text-align:center;font-size:clamp(1.1rem,4vw,1.7rem);font-weight:800;line-height:1.5}
+#kb{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+#kb button{width:clamp(34px,9vw,46px);height:44px;border:2px solid var(--keyb);background:var(--key);color:var(--ink);border-radius:10px;font-size:1.05rem;font-weight:800;cursor:pointer}
+#kb button:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#kb button.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+#kb button.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+#kb button:disabled{cursor:default}
+.fly{position:absolute;font-weight:800;color:var(--gold);font-size:1.4rem;pointer-events:none;animation:fly .9s forwards}
+@keyframes fly{to{transform:translateY(-60px);opacity:0}}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
+#ov[hidden]{display:none}
+#ov div{background:var(--card);max-width:440px;width:100%;border-radius:18px;padding:24px;text-align:center}
+#ov h1{margin:0 0 10px;font-size:1.6rem}
+#ov p{margin:0 0 12px;line-height:1.5;color:var(--soft)}
+.btn{background:var(--gold);color:#2b1d14;border:0;border-radius:12px;padding:12px 26px;font-size:1.05rem;font-weight:800;cursor:pointer}
+#snd{background:none;border:0;font-size:1.3rem;cursor:pointer;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="stage">
+  <div id="hud">
+    <span>⏱ <b id="time">5:00</b></span>
+    <span>🪙 <b id="coins">0</b></span>
+    <span>⭐ <b id="score">0</b> pts</span>
+    <span id="lives" aria-label="Oportunidades"></span>
+    <span>Palabra <b id="n">1</b>/8</span>
+    <button id="snd" title="Música" aria-label="Activar o silenciar música">🔊</button>
+  </div>
+  <section id="card">
+    <div id="top">
+      <svg id="man" viewBox="0 0 160 200" aria-label="Muñeco del ahorcado">
+        <path class="g" d="M20 190H110M45 190V15H110V35"/>
+        <circle class="p" cx="110" cy="50" r="15"/>
+        <path class="p" d="M110 65V120"/>
+        <path class="p" d="M110 78L90 102"/>
+        <path class="p" d="M110 78L130 102"/>
+        <path class="p" d="M110 120L92 157"/>
+        <path class="p" d="M110 120L128 157"/>
+      </svg>
+      <div id="info"><p id="hint"></p><div id="word" aria-live="polite"></div></div>
+    </div>
+    <div id="kb"></div>
+  </section>
+</main>
+<div id="ov">
+  <div>
+    <h1 id="ovt">El Ahorcado: Reformas Educativas de Bolivia</h1>
+    <p id="ovp">Adivina 8 palabras sobre la historia de la educación boliviana. Tienes 3 oportunidades gratis por palabra; después, cada error dibuja una parte del cuerpo. Si se completa, pierdes. Cada letra acertada te da una moneda 🪙. Tienes 5 minutos en total.</p>
+    <button class="btn" id="go">Jugar</button>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const WORDS=[
+{w:'WARISATA',s:'school',h:'Pueblo del altiplano donde nació en 1931 la escuela-ayllu de Avelino Siñani y Elizardo Pérez.'},
+{w:'CODIGO',s:'book',h:'En 1955, tras la Revolución de 1952, se promulgó el ______ de la Educación Boliviana.'},
+{w:'INTERCULTURAL',s:'flag',h:'La Reforma Educativa de 1994 (Ley 1565) promovió una educación ______ y bilingüe.'},
+{w:'BILINGUE',s:'talk',h:'Educación que usa dos lenguas: el castellano y una lengua originaria.'},
+{w:'ALFABETIZACION',s:'abc',h:'Campaña “Yo sí puedo”: en 2008 Bolivia fue declarada libre de analfabetismo gracias a la ______.'},
+{w:'DESCOLONIZADORA',s:'sun',h:'La Ley 070 Avelino Siñani–Elizardo Pérez (2010) propone una educación ______, comunitaria y productiva.'},
+{w:'PRODUCTIVO',s:'field',h:'El modelo educativo vigente es sociocomunitario ______.'},
+{w:'AYLLU',s:'ayllu',h:'Comunidad andina que inspiró el modelo de la escuela de Warisata.'}
+];
+const PAL={school:['#f6b26b','#6fa8dc','#8e7cc3','#b5894f'],book:['#ffd9a0','#7aa6c2','#6b8e9b','#7a9b57'],flag:['#f4c95d','#e07a5f','#7d5a50','#5c8a4a'],talk:['#bde0fe','#a2d2ff','#7b8fb7','#6a994e'],abc:['#ffe5b4','#f4a261','#9a6b4f','#588157'],sun:['#ff9e6d','#ffd166','#6d597a','#8a6d3b'],field:['#cdeac0','#8ecae6','#4f7942','#6a994e'],ayllu:['#f9c784','#fcaf58','#6e4b3a','#9c7a54']};
+const MOT={
+school:"<rect x='110' y='290' width='230' height='120' fill='#e8c39e'/><path d='M95 290L225 225L355 290Z' fill='#a0522d'/><rect x='205' y='345' width='40' height='65' fill='#5d4037'/><rect x='135' y='320' width='32' height='32' fill='#fff'/><rect x='283' y='320' width='32' height='32' fill='#fff'/>",
+book:"<path d='M400 290Q500 260 600 290V420Q500 395 400 420Z' fill='#fff'/><path d='M400 290Q300 260 200 290V420Q300 395 400 420Z' fill='#fdf6e3'/><path d='M400 290V420M230 320Q300 308 370 330M230 350Q300 338 370 360M430 330Q500 308 570 320M430 360Q500 338 570 350' stroke='#8a7a60' fill='none' stroke-width='3'/>",
+flag:"<rect x='250' y='230' width='300' height='40' fill='#d52b1e'/><rect x='250' y='270' width='300' height='40' fill='#f9e300'/><rect x='250' y='310' width='300' height='40' fill='#007934'/><rect x='240' y='220' width='10' height='200' fill='#5d4037'/>",
+talk:"<rect x='150' y='230' width='230' height='90' rx='30' fill='#fff'/><text x='265' y='288' font-size='44' font-family='Arial' text-anchor='middle' fill='#333'>Hola</text><rect x='420' y='300' width='260' height='90' rx='30' fill='#ffe066'/><text x='550' y='358' font-size='40' font-family='Arial' text-anchor='middle' fill='#333'>Kamisaki</text>",
+abc:"<text x='120' y='400' font-size='190' font-family='Georgia' font-weight='bold' fill='#fff' opacity='.85'>A</text><text x='320' y='400' font-size='190' font-family='Georgia' font-weight='bold' fill='#ffd166' opacity='.9'>B</text><text x='520' y='400' font-size='190' font-family='Georgia' font-weight='bold' fill='#fff' opacity='.85'>C</text>",
+sun:"<circle cx='400' cy='330' r='80' fill='#ffd166'/><path d='M400 200V230M400 430V460M270 330H300M500 330H530M310 240L330 260M490 240L470 260' stroke='#ffd166' stroke-width='8'/><path d='M330 330Q400 270 470 330' stroke='#c1440e' stroke-width='6' fill='none'/>",
+field:"<path d='M0 440Q400 400 800 440M0 470Q400 430 800 470' stroke='#3a5a2a' stroke-width='6' fill='none'/><g fill='#2e7d32'><path d='M150 420q10-60 30-50q-5 30-30 50zM300 410q10-60 30-50q-5 30-30 50zM450 420q10-60 30-50q-5 30-30 50zM600 410q10-60 30-50q-5 30-30 50z'/></g><circle cx='200' cy='350' r='10' fill='#e0a21a'/><circle cx='520' cy='340' r='10' fill='#e0a21a'/>",
+ayllu:"<g fill='#d9a066'><rect x='130' y='360' width='70' height='50'/><rect x='260' y='370' width='70' height='40'/><rect x='400' y='355' width='80' height='55'/><rect x='550' y='370' width='70' height='40'/></g><g fill='#8b5a2b'><path d='M120 360L165 320L210 360Z'/><path d='M250 370L295 335L340 370Z'/><path d='M390 355L440 312L490 355Z'/><path d='M540 370L585 335L630 370Z'/></g>"
+};
+function bg(t){const c=PAL[t];return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${c[0]}'/><stop offset='1' stop-color='${c[1]}'/></linearGradient></defs><rect width='800' height='500' fill='url(#g)'/><circle cx='660' cy='100' r='45' fill='#fff7c2' opacity='.9'/><path d='M0 360L150 190L240 290L360 150L520 340L640 230L800 360V500H0Z' fill='${c[2]}' opacity='.85'/><path d='M0 420Q200 370 400 420T800 410V500H0Z' fill='${c[3]}'/>${MOT[t]}</svg>`}
+let order,i,q,used,err,score,coins,t,tick,run=false;
+const parts=[...document.querySelectorAll('#man .p')];
+function hud(){const m=Math.floor(t/60),s=t%60;$('time').textContent=m+':'+String(s).padStart(2,'0');$('time').className=t<=60?'warn':'';$('coins').textContent=coins;$('score').textContent=score;$('n').textContent=Math.min(i+1,8);$('lives').textContent='❤️'.repeat(Math.max(0,3-err))+'🖤'.repeat(Math.min(3,err));parts.forEach((p,k)=>p.classList.toggle('on',k<err-3))}
+function draw(){$('word').innerHTML=[...q.w].map(l=>`<span>${used.has(l)?l:''}</span>`).join('')}
+function load(){q=order[i];used=new Set();err=0;$('hint').textContent=q.h;$('stage').style.backgroundImage=`url("data:image/svg+xml,${encodeURIComponent(bg(q.s))}")`;
+$('kb').innerHTML='ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').map(l=>`<button data-l='${l}'>${l}</button>`).join('');draw();hud()}
+function fly(txt){const e=document.createElement('div');e.className='fly';e.textContent=txt;e.style.left=(20+Math.random()*60)+'%';e.style.top='40%';$('card').appendChild(e);setTimeout(()=>e.remove(),900)}
+function guess(l){if(!run||used.has(l))return;used.add(l);const b=document.querySelector(`#kb button[data-l='${l}']`);if(b){b.disabled=true}
+if(q.w.includes(l)){const n=[...q.w].filter(x=>x===l).length;coins+=n;score+=10*n;if(b)b.className='ok';fly('+'+n+' 🪙');sfx(660);draw();
+if([...q.w].every(x=>used.has(x))){score+=50+10*Math.max(0,3-err);hud();run=false;fly('¡Correcto! +50');setTimeout(()=>{i++;if(i>=order.length){end(true)}else{run=true;load()}},1300)}else hud()}
+else{err++;if(b)b.className='bad';sfx(180);$('card').classList.remove('shake');void $('card').offsetWidth;$('card').classList.add('shake');hud();if(err>=9){draw();used=new Set([...q.w]);draw();end(false,'¡El muñeco quedó completo! La palabra era '+q.w+'.')}}}
+function end(win,msg){run=false;clearInterval(tick);if(win)score+=t;hud();$('ovt').textContent=win?'¡Ganaste! 🎓':'Fin del juego';$('ovp').innerHTML=(win?'Completaste las 8 palabras con '+t+' s de sobra (+'+t+' pts).':msg)+'<br><br>🪙 Monedas: <b>'+coins+'</b> · ⭐ Puntos: <b>'+score+'</b>';$('go').textContent='Jugar otra vez';$('ov').hidden=false}
+function start(){order=[...WORDS].sort(()=>Math.random()-.5);i=0;score=0;coins=0;t=300;run=true;$('ov').hidden=true;music();load();clearInterval(tick);tick=setInterval(()=>{if(!run)return;t--;hud();if(t<=0)end(false,'¡Se acabó el tiempo!')},1000)}
+$('go').onclick=start;
+$('kb').onclick=e=>{if(e.target.dataset.l)guess(e.target.dataset.l)};
+addEventListener('keydown',e=>{const l=e.key.toUpperCase();if(/^[A-ZÑ]$/.test(l))guess(l)});
+/* Música original generada en el navegador (sin derechos de autor) */
+let ac,master,muted=false,sched;
+function sfx(f){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.2);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.2)}
+function music(){if(ac){if(ac.state==='suspended'&&!muted)ac.resume();return}
+try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+master=ac.createGain();master.gain.value=.14;master.connect(ac.destination);
+const N=[220,261.6,293.7,329.6,392,440,523.3],M=[5,4,3,4,2,3,0,-1,5,6,5,4,3,2,3,-1];let step=0,next=ac.currentTime+.1;
+function play(s,tm){const k=M[s%16];if(k>=0){const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=N[k]*(s%32>=16?1:1);g.gain.setValueAtTime(0,tm);g.gain.linearRampToValueAtTime(.7,tm+.04);g.gain.exponentialRampToValueAtTime(.001,tm+.6);o.connect(g).connect(master);o.start(tm);o.stop(tm+.65)}
+if(s%2===0){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(110,tm);o.frequency.exponentialRampToValueAtTime(45,tm+.25);g.gain.setValueAtTime(.9,tm);g.gain.exponentialRampToValueAtTime(.001,tm+.3);o.connect(g).connect(master);o.start(tm);o.stop(tm+.32)}
+if(s%16===0){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=110;g.gain.setValueAtTime(.25,tm);g.gain.linearRampToValueAtTime(0,tm+6.7);o.connect(g).connect(master);o.start(tm);o.stop(tm+6.8)}}
+sched=setInterval(()=>{while(next<ac.currentTime+.3){play(step,next);next+=.42;step++}},100)}
+$('snd').onclick=()=>{muted=!muted;$('snd').textContent=muted?'🔇':'🔊';if(!ac)return;muted?ac.suspend():ac.resume()};
+$('stage').style.backgroundImage=`url("data:image/svg+xml,${encodeURIComponent(bg('school'))}")`;
+</script>
+</body>
+</html>
